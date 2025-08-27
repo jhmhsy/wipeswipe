@@ -13,7 +13,7 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
     on<SessionRestart>(_onRestartSession);
   }
   final GalleryRepository _repo;
-
+//add stuff for clout
   Future<void> _onPhotosRequested(
     PhotosRequested event,
     Emitter<PhotoState> emit,
