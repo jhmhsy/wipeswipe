@@ -18,6 +18,7 @@ class GlobalObserver extends BlocObserver {
   void onChange(BlocBase bloc, Change change) {
     super.onChange(bloc, change);
     // TODO: implement onChange
+    print('State changed: $bloc ($change)');
   }
 
   @override
