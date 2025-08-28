@@ -3,12 +3,16 @@ import 'package:photo_manager/photo_manager.dart';
 class GalleryRepository {
   //Create a repository for fetching photos
   Future<List<AssetEntity>> fetchPhotos({int limit = 200}) async {
-    PermissionState ps = await PhotoManager.requestPermissionExtend();
-    //ask permission
-    if (!ps.isAuth) {
-      PhotoManager.openSetting();
-      throw const GalleryPermissionException();
-    }
+    final permission = await PhotoManager.getPermissionState(
+      requestOption: const PermissionRequestOption(
+        androidPermission: AndroidPermission(
+          type: RequestType.image,
+          mediaLocation: false,
+        ),
+      ),
+    );
+
+    if (permission != PermissionState.authorized) throw GalleryPermissionException();
     final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
       hasAll: true,
       type: RequestType.image,
@@ -21,6 +25,21 @@ class GalleryRepository {
       size: limit,
     );
     return assets;
+  }
+
+  static Future<bool> requestPermission() async {
+    final ps = await PhotoManager.requestPermissionExtend(
+      requestOption: const PermissionRequestOption(
+        androidPermission: AndroidPermission(
+          type: RequestType.image,
+          mediaLocation: false,
+        ),
+      ),
+    );
+    if (ps == PermissionState.denied) {
+      return false;
+    }
+    return ps.isAuth;
   }
 }
 
