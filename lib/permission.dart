@@ -28,6 +28,20 @@ class GalleryRepository {
   }
 
   static Future<bool> requestPermission() async {
+    final currentState = await PhotoManager.getPermissionState(
+      requestOption: const PermissionRequestOption(
+        androidPermission: AndroidPermission(
+          type: RequestType.image,
+          mediaLocation: false,
+        ),
+      ),
+    );
+
+    if (currentState == PermissionState.authorized) {
+      return true;
+    }
+
+    // Request permission
     final ps = await PhotoManager.requestPermissionExtend(
       requestOption: const PermissionRequestOption(
         androidPermission: AndroidPermission(
@@ -36,10 +50,9 @@ class GalleryRepository {
         ),
       ),
     );
-    if (ps == PermissionState.denied) {
-      return false;
-    }
-    return ps.isAuth;
+
+    // Properly check the result
+    return ps == PermissionState.authorized;
   }
 }
 

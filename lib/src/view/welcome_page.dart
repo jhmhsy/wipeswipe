@@ -114,7 +114,6 @@ class _WelcomePageState extends State<WelcomePage> {
                         onPressed: () async {
                           final hasPermission =
                               await GalleryRepository.requestPermission();
-
                           if (hasPermission && context.mounted) {
                             Navigator.pushReplacement(
                               context,
