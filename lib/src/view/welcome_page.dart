@@ -37,7 +37,6 @@ class _WelcomePageState extends State<WelcomePage> {
               child: PageView(
                 controller: controller,
                 children: [
-                  // Page 1
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -58,8 +57,6 @@ class _WelcomePageState extends State<WelcomePage> {
                       ),
                     ],
                   ),
-
-                  // Page 3
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -105,8 +102,8 @@ class _WelcomePageState extends State<WelcomePage> {
                       SizedBox(height: 20),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.purple, // background color
-                          foregroundColor: Colors.white, // text color
+                          backgroundColor: Colors.purple,
+                          foregroundColor: Colors.white,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -114,17 +111,17 @@ class _WelcomePageState extends State<WelcomePage> {
                         onPressed: () async {
                           final hasPermission =
                               await GalleryRepository.requestPermission();
-                          if (hasPermission && context.mounted) {
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(builder: (_) => MainScreen()),
-                            );
-                          } else {
-                            if (context.mounted) {
+                          if (context.mounted) {
+                            if (hasPermission) {
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (_) => MainScreen()),
+                              );
+                            } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                    "Permission required to access photos",
+                                    "Full permission is required to access photos",
                                   ),
                                   action: SnackBarAction(
                                     label: "Settings",

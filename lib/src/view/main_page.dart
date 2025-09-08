@@ -10,7 +10,6 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO: implement build
     return MaterialApp(
       home: BlocProvider(
         create: (_) => PhotoBloc(GalleryRepository())..add(PhotosRequested()),
@@ -47,10 +46,10 @@ class _MainPageState extends State<MainPage> {
                       const Text('Permission needed to use the app.'),
                       const SizedBox(height: 12),
                       ElevatedButton(
-                        onPressed: () => context.read<PhotoBloc>().add(
-                          const PhotosRequested(),
-                        ),
-                        child: Text('Try again'),
+                        onPressed: () {
+                          PhotoManager.openSetting();
+                        },
+                        child: Text('Grant Permission'),
                       ),
                     ],
                   ),

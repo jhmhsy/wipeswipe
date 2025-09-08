@@ -3,16 +3,11 @@ import 'package:photo_manager/photo_manager.dart';
 class GalleryRepository {
   //Create a repository for fetching photos
   Future<List<AssetEntity>> fetchPhotos({int limit = 200}) async {
-    final permission = await PhotoManager.getPermissionState(
-      requestOption: const PermissionRequestOption(
-        androidPermission: AndroidPermission(
-          type: RequestType.image,
-          mediaLocation: false,
-        ),
-      ),
-    );
+    final permission = await checkPermission();
 
-    if (permission != PermissionState.authorized) throw GalleryPermissionException();
+    if (permission != PermissionState.authorized) {
+      throw GalleryPermissionException();
+    }
     final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
       hasAll: true,
       type: RequestType.image,
@@ -27,8 +22,8 @@ class GalleryRepository {
     return assets;
   }
 
-  static Future<bool> requestPermission() async {
-    final currentState = await PhotoManager.getPermissionState(
+  static Future<PermissionState> checkPermission() async {
+    final ps = await PhotoManager.getPermissionState(
       requestOption: const PermissionRequestOption(
         androidPermission: AndroidPermission(
           type: RequestType.image,
@@ -36,13 +31,17 @@ class GalleryRepository {
         ),
       ),
     );
+    print(ps);
+    return ps;
+  }
 
+  static Future<bool> requestPermission() async {
+    final currentState = await checkPermission();
     if (currentState == PermissionState.authorized) {
       return true;
     }
 
-    // Request permission
-    final ps = await PhotoManager.requestPermissionExtend(
+    final newState = await PhotoManager.requestPermissionExtend(
       requestOption: const PermissionRequestOption(
         androidPermission: AndroidPermission(
           type: RequestType.image,
@@ -50,9 +49,8 @@ class GalleryRepository {
         ),
       ),
     );
-
-    // Properly check the result
-    return ps == PermissionState.authorized;
+    print(newState);
+    return newState == PermissionState.authorized;
   }
 }
 
