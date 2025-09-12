@@ -11,6 +11,8 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
     on<SwipeLeft>(_onSwipeLeft);
     on<SwipeRight>(_onSwipeRight);
     on<SessionRestart>(_onRestartSession);
+    on<UndoKept>(_onUndoKept);
+    on<UndoDiscarded>(_onUndoDiscarded);
   }
   final GalleryRepository _repo;
   //add stuff for clout
@@ -67,6 +69,24 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
         kept: const [],
         discarded: const [],
         status: state.photos.isEmpty ? PhotoStatus.initial : PhotoStatus.ready,
+      ),
+    );
+  }
+
+  void _onUndoKept(UndoKept event, Emitter<PhotoState> emit) {
+    emit(
+      state.copyWith(
+        kept: state.kept.where((a) => !event.assets.contains(a)).toList(),
+        photos: List.of(state.photos)..addAll(event.assets),
+      ),
+    );
+  }
+
+  void _onUndoDiscarded(UndoDiscarded event, Emitter<PhotoState> emit) {
+    emit(
+      state.copyWith(
+        kept: state.discarded.where((a) => !event.assets.contains(a)).toList(),
+        photos: List.of(state.photos)..addAll(event.assets),
       ),
     );
   }
