@@ -13,7 +13,7 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
     on<SessionRestart>(_onRestartSession);
   }
   final GalleryRepository _repo;
-//add stuff for clout
+  //add stuff for clout
   Future<void> _onPhotosRequested(
     PhotosRequested event,
     Emitter<PhotoState> emit,
@@ -42,7 +42,7 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
     final current = state.current!;
     emit(
       state.copyWith(
-        kept: List.of(state.kept)..add(current),
+        discarded: List.of(state.discarded)..add(current),
         index: state.index + 1,
       ),
     );
@@ -51,9 +51,10 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
   void _onSwipeRight(SwipeRight event, Emitter<PhotoState> emit) {
     if (!state.hasCurrent) return;
     final current = state.current!;
+
     emit(
       state.copyWith(
-        discarded: List.of(state.kept)..add(current),
+        kept: List.of(state.kept)..add(current),
         index: state.index + 1,
       ),
     );

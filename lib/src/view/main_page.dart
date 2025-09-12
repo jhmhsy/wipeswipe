@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:wipeswipe/bloc/photo_bloc.dart';
@@ -26,18 +27,94 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> {
+class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
+  late final AnimationController _controller;
+  static const List<IconData> icons = [
+    Icons.photo_library,
+    Icons.delete_forever,
+  ];
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return Scaffold(
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children:
+            List.generate(icons.length, (int index) {
+              Widget child = Container(
+                height: 70.0,
+                width: 56.0,
+                alignment: FractionalOffset.topCenter,
+                child: ScaleTransition(
+                  scale: CurvedAnimation(
+                    parent: _controller,
+                    curve: Interval(
+                      0.0,
+                      1.0 - index / icons.length / 2.0,
+                      curve: Curves.easeOut,
+                    ),
+                  ),
+                  child: FloatingActionButton(
+                    shape: CircleBorder(),
+                    heroTag: null,
+                    mini: true,
+                    child: Icon(icons[index]),
+                    onPressed: () {},
+                  ),
+                ),
+              );
+              return child;
+            }).toList()..add(
+              FloatingActionButton(
+                heroTag: null,
+                child: AnimatedBuilder(
+                  animation: _controller,
+                  builder: (BuildContext context, Widget? child) {
+                    return Transform(
+                      transform: Matrix4.rotationZ(
+                        _controller.value * 0.5 * math.pi,
+                      ),
+                      alignment: FractionalOffset.center,
+                      child: Icon(
+                        _controller.isDismissed
+                            ? Icons.keyboard_arrow_up_outlined
+                            : Icons.close,
+                      ),
+                    );
+                  },
+                ),
+                onPressed: () {
+                  if (_controller.isDismissed) {
+                    _controller.forward();
+                  } else {
+                    _controller.reverse();
+                  }
+                },
+              ),
+            ),
+      ),
       body: SafeArea(
         child: BlocBuilder<PhotoBloc, PhotoState>(
           builder: (context, state) {
             switch (state.status) {
               case PhotoStatus.initial:
               case PhotoStatus.loading:
-                return Center(child: CircularProgressIndicator());
+                return Center();
               case PhotoStatus.permissionDenied:
                 return Center(
                   child: Column(
