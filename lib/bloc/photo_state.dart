@@ -26,12 +26,13 @@ class PhotoState extends Equatable {
       kept = const [],
       discarded = const [],
       error = null;
-      
+
   bool get hasCurrent => index >= 0 && index < photos.length;
   AssetEntity? get current => hasCurrent ? photos[index] : null;
   bool get isDone => index >= photos.length;
 
   PhotoState copyWith({
+    Set<AssetEntity>? selected,
     PhotoStatus? status,
     List<AssetEntity>? photos,
     int? index,

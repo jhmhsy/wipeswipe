@@ -1,3 +1,4 @@
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -12,6 +13,8 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
     on<SwipeRight>(_onSwipeRight);
     on<SessionRestart>(_onRestartSession);
     on<DeletePhotos>(_onDeletePhotos);
+    on<PhotoToggleSelection>(_onPhotoToggleSelection);
+    on<ClearAll>(_onClearAll);
   }
   final GalleryRepository _repo;
   //add stuff for clout
@@ -41,8 +44,10 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
   void _onSwipeLeft(SwipeLeft event, Emitter<PhotoState> emit) {
     if (!state.hasCurrent) return;
     final current = state.current!;
+
     emit(
       state.copyWith(
+        kept: List.of(state.kept)..remove(current),
         discarded: List.of(state.discarded)..add(current),
         index: state.index + 1,
       ),
@@ -56,6 +61,7 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
     emit(
       state.copyWith(
         kept: List.of(state.kept)..add(current),
+        discarded: List.of(state.discarded)..remove(current),
         index: state.index + 1,
       ),
     );
@@ -72,13 +78,31 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
     );
   }
 
+  void _onPhotoToggleSelection(
+    PhotoToggleSelection event,
+    Emitter<PhotoState> emit,
+  ) {
+    final asset = event.asset;
+    final shouldBeDeleted = event.shouldBeDeleted;
+
+    final newDiscarded = shouldBeDeleted
+        ? _addIfNotPresent(state.discarded, asset)
+        : _removebyId(state.discarded, asset.id);
+
+    final newKept = shouldBeDeleted
+        ? _removebyId(state.kept, asset.id)
+        : _addIfNotPresent(state.kept, asset);
+
+    emit(state.copyWith(discarded: newDiscarded, kept: newKept));
+  }
+
   void _onDeletePhotos(DeletePhotos event, Emitter<PhotoState> emit) async {
-    if (event.selectedPhotos.isEmpty) {
+    if (state.discarded.isEmpty) {
       return;
     }
     try {
       emit(state.copyWith(status: PhotoStatus.loading));
-      final success = await _repo.deletePhotos(event.selectedPhotos);
+      final success = await _repo.deletePhotos(state.discarded);
       if (success) {
         final photos = await _repo.fetchPhotos(limit: 200);
         emit(
@@ -106,5 +130,22 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
         ),
       );
     }
+  }
+
+  void _onClearAll(ClearAll event, Emitter<PhotoState> emit) {
+    final newKept = [...state.kept, ...state.discarded];
+    emit(state.copyWith(kept: newKept, discarded: []));
+  }
+
+  List<AssetEntity> _removebyId(List<AssetEntity> list, String id) {
+    return list.where((item) => item.id != id).toList();
+  }
+
+  List<AssetEntity> _addIfNotPresent(
+    List<AssetEntity> list,
+    AssetEntity asset,
+  ) {
+    if (list.any((item) => item.id == asset.id)) return list;
+    return [...list, asset];
   }
 }

@@ -47,22 +47,20 @@ class _MainPageState extends State<MainPage> {
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey,
+                      color: Colors.black,
                     ),
                   ),
                 ),
                 FloatingActionButton(
                   shape: CircleBorder(),
                   heroTag: null,
-                  child: Icon(Icons.photo_library_outlined),
+                  child: Icon(Icons.photo_library_outlined, color: Colors.red),
                   onPressed: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => ReviewPage(
-                          assets: state.photos,
-                          photoBloc: context.read<PhotoBloc>(),
-                        ),
+                        builder: (context) =>
+                            ReviewPage(photoBloc: context.read<PhotoBloc>()),
                       ),
                     );
                   },
@@ -74,7 +72,7 @@ class _MainPageState extends State<MainPage> {
                     style: TextStyle(
                       fontSize: 30,
                       fontWeight: FontWeight.bold,
-                      color: Colors.grey,
+                      color: Colors.black,
                     ),
                   ),
                 ),
@@ -251,10 +249,8 @@ class _SummaryView extends StatelessWidget {
                   onPressed: () => Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ReviewPage(
-                        assets: assets,
-                        photoBloc: context.read<PhotoBloc>(),
-                      ),
+                      builder: (context) =>
+                          ReviewPage(photoBloc: context.read<PhotoBloc>()),
                     ),
                   ),
                   child: const Text('Review Files'),
