@@ -11,8 +11,7 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
     on<SwipeLeft>(_onSwipeLeft);
     on<SwipeRight>(_onSwipeRight);
     on<SessionRestart>(_onRestartSession);
-    on<UndoKept>(_onUndoKept);
-    on<UndoDiscarded>(_onUndoDiscarded);
+    on<DeletePhotos>(_onDeletePhotos);
   }
   final GalleryRepository _repo;
   //add stuff for clout
@@ -73,21 +72,39 @@ class PhotoBloc extends Bloc<PhotoEvent, PhotoState> {
     );
   }
 
-  void _onUndoKept(UndoKept event, Emitter<PhotoState> emit) {
-    emit(
-      state.copyWith(
-        kept: state.kept.where((a) => !event.assets.contains(a)).toList(),
-        photos: List.of(state.photos)..addAll(event.assets),
-      ),
-    );
-  }
-
-  void _onUndoDiscarded(UndoDiscarded event, Emitter<PhotoState> emit) {
-    emit(
-      state.copyWith(
-        kept: state.discarded.where((a) => !event.assets.contains(a)).toList(),
-        photos: List.of(state.photos)..addAll(event.assets),
-      ),
-    );
+  void _onDeletePhotos(DeletePhotos event, Emitter<PhotoState> emit) async {
+    if (event.selectedPhotos.isEmpty) {
+      return;
+    }
+    try {
+      emit(state.copyWith(status: PhotoStatus.loading));
+      final success = await _repo.deletePhotos(event.selectedPhotos);
+      if (success) {
+        final photos = await _repo.fetchPhotos(limit: 200);
+        emit(
+          state.copyWith(
+            status: PhotoStatus.ready,
+            photos: photos,
+            index: 0,
+            kept: const [],
+            discarded: const [],
+          ),
+        );
+      } else {
+        emit(
+          state.copyWith(
+            status: PhotoStatus.failure,
+            error: 'Failed to delete photos',
+          ),
+        );
+      }
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: PhotoStatus.failure,
+          error: 'Error deleting photos: $e',
+        ),
+      );
+    }
   }
 }

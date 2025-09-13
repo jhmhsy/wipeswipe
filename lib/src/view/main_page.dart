@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -12,11 +11,9 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: BlocProvider(
-        create: (_) => PhotoBloc(GalleryRepository())..add(PhotosRequested()),
-        child: MainPage(),
-      ),
+    return BlocProvider<PhotoBloc>(
+      create: (_) => PhotoBloc(GalleryRepository())..add(PhotosRequested()),
+      child: MaterialApp(home: MainPage()),
     );
   }
 }
@@ -28,120 +25,61 @@ class MainPage extends StatefulWidget {
   State<MainPage> createState() => _MainPageState();
 }
 
-class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
-  late final AnimationController _controller;
-  static const List<IconData> icons = [
-    Icons.photo_library,
-    Icons.delete_forever,
-  ];
-  @override
-  void initState() {
-    super.initState();
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 500),
-    );
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
+class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
     return BlocBuilder<PhotoBloc, PhotoState>(
       builder: (context, state) {
         return Scaffold(
-          floatingActionButton: Column(
-            mainAxisSize: MainAxisSize.min,
-            children:
-                List.generate(icons.length, (int index) {
-                  Widget child = Container(
-                    height: 70.0,
-                    width: 56.0,
-                    alignment: FractionalOffset.topCenter,
-                    child: ScaleTransition(
-                      scale: CurvedAnimation(
-                        parent: _controller,
-                        curve: Interval(
-                          0.0,
-                          1.0 - index / icons.length / 2.0,
-                          curve: Curves.easeOut,
-                        ),
-                      ),
-                      child: FloatingActionButton(
-                        shape: CircleBorder(),
-                        heroTag: null,
-                        mini: true,
-                        child: Icon(icons[index]),
-                        onPressed: () {
-                          if (index == 0) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ReviewPage(
-                                  assets: state.kept,
-                                  onUndo: (selectedAssets) {
-                                    context.read<PhotoBloc>().add(
-                                      UndoKept(selectedAssets),
-                                    );
-                                  },
-                                  title: "Kept",
-                                ),
-                              ),
-                            );
-                          } else if (index == 1) {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ReviewPage(
-                                  assets: state.discarded,
-                                  onUndo: (selectedAssets) {
-                                    context.read<PhotoBloc>().add(
-                                      UndoDiscarded(selectedAssets),
-                                    );
-                                  },
-                                  title: "Discarded",
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                      ),
+          floatingActionButtonLocation:
+              FloatingActionButtonLocation.centerFloat,
+          floatingActionButton: SizedBox(
+            width: double.infinity,
+            height: 80,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Positioned(
+                  left: 20,
+                  child: Text(
+                    "Delete",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
                     ),
-                  );
-                  return child;
-                }).toList()..add(
-                  FloatingActionButton(
-                    heroTag: null,
-                    child: AnimatedBuilder(
-                      animation: _controller,
-                      builder: (BuildContext context, Widget? child) {
-                        return Transform(
-                          transform: Matrix4.rotationZ(
-                            _controller.value * 0.5 * math.pi,
-                          ),
-                          alignment: FractionalOffset.center,
-                          child: Icon(
-                            _controller.isDismissed
-                                ? Icons.keyboard_arrow_up_outlined
-                                : Icons.close,
-                          ),
-                        );
-                      },
-                    ),
-                    onPressed: () {
-                      if (_controller.isDismissed) {
-                        _controller.forward();
-                      } else {
-                        _controller.reverse();
-                      }
-                    },
                   ),
                 ),
+                FloatingActionButton(
+                  shape: CircleBorder(),
+                  heroTag: null,
+                  child: Icon(Icons.photo_library_outlined),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ReviewPage(
+                          assets: state.photos,
+                          photoBloc: context.read<PhotoBloc>(),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                Positioned(
+                  right: 20,
+                  child: Text(
+                    "Keep",
+                    style: TextStyle(
+                      fontSize: 30,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
           body: SafeArea(
             child: Builder(
@@ -185,8 +123,8 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                   case PhotoStatus.ready:
                     if (state.isDone) {
                       return _SummaryView(
-                        kept: state.kept.length,
-                        discarded: state.discarded.length,
+                        assets: state.photos,
+                        discarded: state.discarded,
                         onRestart: () => context.read<PhotoBloc>().add(
                           const SessionRestart(),
                         ),
@@ -210,11 +148,11 @@ class _MainPageState extends State<MainPage> with TickerProviderStateMixin {
                                 }
                               },
                               background: _SwipeBackground(
-                                color: Colors.green,
+                                color: Colors.red,
                                 icon: Icons.check,
                               ),
                               secondaryBackground: _SwipeBackground(
-                                color: Colors.red,
+                                color: Colors.green,
                                 icon: Icons.close,
                                 alignEnd: true,
                               ),
@@ -279,12 +217,12 @@ class _SwipeBackground extends StatelessWidget {
 
 class _SummaryView extends StatelessWidget {
   const _SummaryView({
-    required this.kept,
+    required this.assets,
     required this.discarded,
     required this.onRestart,
   });
-  final int kept;
-  final int discarded;
+  final List<AssetEntity> assets;
+  final List<AssetEntity> discarded;
   final VoidCallback onRestart;
 
   @override
@@ -295,9 +233,35 @@ class _SummaryView extends StatelessWidget {
         children: [
           Text('Done!', style: Theme.of(context).textTheme.headlineMedium),
           const SizedBox(height: 12),
-          Text('Kept: $kept, Discarded: $discarded'),
+          Text(
+            'Kept: ${assets.length - discarded.length}, Discarded: ${discarded.length}',
+          ),
           const SizedBox(height: 12),
-          ElevatedButton(onPressed: onRestart, child: const Text('Restart')),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: onRestart,
+                  child: const Text('Restart'),
+                ),
+              ),
+              SizedBox(width: 6),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ReviewPage(
+                        assets: assets,
+                        photoBloc: context.read<PhotoBloc>(),
+                      ),
+                    ),
+                  ),
+                  child: const Text('Review Files'),
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );

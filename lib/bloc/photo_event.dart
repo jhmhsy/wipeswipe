@@ -23,12 +23,10 @@ class SessionRestart extends PhotoEvent {
   const SessionRestart();
 }
 
-class UndoKept extends PhotoEvent {
-  final List<AssetEntity> assets;
-  const UndoKept(this.assets);
-}
+class DeletePhotos extends PhotoEvent {
+  final List<AssetEntity> selectedPhotos;
+  const DeletePhotos(this.selectedPhotos);
 
-class UndoDiscarded extends PhotoEvent {
-  final List<AssetEntity> assets;
-  const UndoDiscarded(this.assets);
+  @override
+  List<Object?> get props => [selectedPhotos];
 }

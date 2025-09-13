@@ -10,7 +10,7 @@ class GalleryRepository {
     }
     final List<AssetPathEntity> paths = await PhotoManager.getAssetPathList(
       hasAll: true,
-      type: RequestType.image,
+      type: RequestType.common,
     );
     if (paths.isEmpty) return [];
 
@@ -51,6 +51,18 @@ class GalleryRepository {
     );
     print(newState);
     return newState == PermissionState.authorized;
+  }
+
+  Future<bool> deletePhotos(List<AssetEntity> assets) async {
+    try {
+      await PhotoManager.editor.deleteWithIds(
+        assets.map((asset) => asset.id).toList(),
+      );
+      return true;
+    } catch (e) {
+      print("Error deleting photos");
+      return false;
+    }
   }
 }
 
