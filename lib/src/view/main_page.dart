@@ -146,11 +146,11 @@ class _MainPageState extends State<MainPage> {
                                 }
                               },
                               background: _SwipeBackground(
-                                color: Colors.red,
+                                color: Colors.green,
                                 icon: Icons.check,
                               ),
                               secondaryBackground: _SwipeBackground(
-                                color: Colors.green,
+                                color: Colors.red,
                                 icon: Icons.close,
                                 alignEnd: true,
                               ),
@@ -205,10 +205,10 @@ class _SwipeBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: alignEnd ? Alignment.center : Alignment.centerLeft,
+      alignment: alignEnd ? Alignment.centerRight : Alignment.centerLeft,
       padding: const EdgeInsets.symmetric(horizontal: 24),
       color: color.withAlpha(1),
-      child: Icon(icon, color: Colors.green, size: 48),
+      child: Icon(icon, color: color, size: 48),
     );
   }
 }

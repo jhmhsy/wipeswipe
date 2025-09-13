@@ -108,7 +108,6 @@ class _ReviewPageState extends State<ReviewPage> {
     );
   }
 
-  // 👇 HELPER METHOD — Put this inside _ReviewPageState
   Widget _buildImageRow(List<AssetEntity> photos, int startIndex) {
     final rows = <Widget>[];
     final end = min(startIndex + 4, photos.length);
@@ -134,7 +133,7 @@ class _ReviewPageState extends State<ReviewPage> {
                         snapshot.data!,
                         fit: BoxFit.cover,
                         width: double.infinity,
-                        height: 120, // Consistent height for grid look
+                        height: 120,
                       ),
                     ),
                     Positioned(
@@ -184,7 +183,7 @@ class _ReviewPageState extends State<ReviewPage> {
 
     return Row(crossAxisAlignment: CrossAxisAlignment.start, children: rows);
   }
-
+  //Helper, to avoid re-rendering of all images, cache each image
   Future<Uint8List?> _loadCachedThumbnail(AssetEntity asset) async {
     if (_thumbnailCache.containsKey(asset.id)) {
       return _thumbnailCache[asset.id];
