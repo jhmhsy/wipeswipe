@@ -40,7 +40,7 @@ class _WelcomePageState extends State<WelcomePage> {
                   Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset('assets/icons/logo.png', scale: 10),
+                      Image.asset('assets/icon/logo.png', scale: 10),
                       SizedBox(height: 20),
                       Text(
                         'Welcome to WipeSwipe',

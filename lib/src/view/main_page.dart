@@ -54,7 +54,7 @@ class _MainPageState extends State<MainPage> {
                 FloatingActionButton(
                   shape: CircleBorder(),
                   heroTag: null,
-                  child: Icon(Icons.photo_library_outlined, color: Colors.red),
+                  child: Icon(Icons.delete, color: Colors.red),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -235,29 +235,7 @@ class _SummaryView extends StatelessWidget {
             'Kept: ${assets.length - discarded.length}, Discarded: ${discarded.length}',
           ),
           const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: onRestart,
-                  child: const Text('Restart'),
-                ),
-              ),
-              SizedBox(width: 6),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          ReviewPage(photoBloc: context.read<PhotoBloc>()),
-                    ),
-                  ),
-                  child: const Text('Review Files'),
-                ),
-              ),
-            ],
-          ),
+          ElevatedButton(onPressed: onRestart, child: const Text('Restart')),
         ],
       ),
     );

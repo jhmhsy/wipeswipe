@@ -3,8 +3,8 @@
     "short_name": "wipeswipe",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
+    "background_color": "#hexcode",
+    "theme_color": "#hexcode",
     "description": "A new Flutter project.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
@@ -27,12 +27,6 @@
         },
         {
             "src": "icons/Icon-maskable-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
-        },
-        {
-            "src": "logo.png",
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "maskable"
